@@ -1,0 +1,5 @@
+function transfer(address _recipient, uint256 _amount) public MintPaused returns (bool) {
+    address owner = _msgSender();
+    _transfer(owner, _recipient, _amount);
+    return true;
+}
