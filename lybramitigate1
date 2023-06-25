@@ -1,0 +1,21 @@
+// New mapping to store the amount spent from each allowance
+mapping(address => mapping(address => uint256)) private amountSpentFromAllowance;
+
+...
+
+// Updated _spendAllowance function
+function _spendAllowance(address owner, address spender, uint256 amount) internal virtual {
+    uint256 currentAllowance = allowance(owner, spender);
+    if (currentAllowance != type(uint256).max) {
+        // Get the previously spent amount from the allowance
+        uint256 previouslySpent = amountSpentFromAllowance[owner][spender];
+
+        require(currentAllowance >= previouslySpent + amount, "ERC20: insufficient allowance");
+
+        // Update the amount spent for the current transfer
+        amountSpentFromAllowance[owner][spender] = previouslySpent + amount;
+
+        unchecked {
+            _approve(owner, spender, currentAllowance - (previouslySpent + amount));
+        }
+    }
