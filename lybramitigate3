@@ -1,0 +1,12 @@
+function _repay(address _provider, address _onBehalfOf, uint256 _amount) internal virtual {
+    // Check the provider's allowance for the contract
+    require(PeUSD.allowance(_provider, address(this)) >= _amount, "Insufficient allowance");
+
+    // Proceed with the repayment
+    // ...
+
+    // Transfer the PeUSD tokens from the provider to the contract
+    PeUSD.transferFrom(_provider, address(configurator), _amount);
+
+    // ...
+}
