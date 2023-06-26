@@ -1,0 +1,9 @@
+modifier onlyConfigurator() {
+    require(msg.sender == address(configurator), "Only the configurator contract can call this function");
+    _;
+}
+
+function notifyRewardAmount(uint amount, uint tokenType) external onlyConfigurator {
+    // Rest of the function implementation
+    // ...
+}
