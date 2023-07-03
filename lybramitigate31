@@ -1,0 +1,13 @@
+function getReward() external updateReward(msg.sender) {
+    require(!isOtherEarningsClaimable(msg.sender), "Insufficient DLP, unable to claim rewards");
+    uint256 reward = rewards[msg.sender];
+    require(reward > 0, "No rewards to claim"); // Additional check to ensure there are rewards to claim
+
+    // Check if the contract has enough esLBR tokens to cover the reward
+    uint256 esLBRBalance = IesLBR(esLBR).balanceOf(address(this));
+    require(esLBRBalance >= reward, "Not enough esLBR tokens in contract");
+
+    rewards[msg.sender] = 0;
+    IesLBR(esLBR).mint(msg.sender, reward);
+    emit ClaimReward(msg.sender, reward, block.timestamp);
+}
