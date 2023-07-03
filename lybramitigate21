@@ -1,0 +1,17 @@
+function purchaseOtherEarnings(address user, bool useEUSD) external updateReward(user) {
+    // ... (omitted for brevity)
+
+    if (reward > 0) {
+        rewards[user] = 0;
+        uint256 biddingFee = (reward * biddingFeeRatio) / 10000;
+        if(useEUSD) {
+            // ... (omitted for brevity)
+            bool success = EUSD.transferFrom(msg.sender, address(configurator), biddingFee);
+            require(success, "TF");
+            try configurator.distributeRewards() {} catch {}
+        } else {
+            IesLBR(LBR).burn(msg.sender, biddingFee);
+        }
+        // ... (omitted for brevity)
+    }
+}
