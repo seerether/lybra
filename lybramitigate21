@@ -1,17 +1,30 @@
 function purchaseOtherEarnings(address user, bool useEUSD) external updateReward(user) {
-    // ... (omitted for brevity)
+    require(isOtherEarningsClaimable(user), "The rewards of the user cannot be bought out");
+    if (useEUSD) {
+        require(isEUSDBuyoutAllowed, "The purchase using EUSD is not permitted.");
 
-    if (reward > 0) {
-        rewards[user] = 0;
-        uint256 biddingFee = (reward * biddingFeeRatio) / 10000;
-        if(useEUSD) {
-            // ... (omitted for brevity)
-            bool success = EUSD.transferFrom(msg.sender, address(configurator), biddingFee);
+        uint256 reward = rewards[user];
+        if (reward > 0) {
+            rewards[user] = 0;
+            uint256 biddingFee = (reward * biddingFeeRatio) / 10000;
+            (, int lbrPrice, , , ) = lbrPriceFeed.latestRoundData();
+            biddingFee = biddingFee * uint256(lbrPrice) / 1e8;
+
+            // Check if the contract has sufficient allowance from the user to transfer EUSD tokens
+            require(EUSD.allowance(user, address(this)) >= biddingFee, "Insufficient EUSD allowance");
+
+            // Transfer EUSD tokens from the user to the contract
+            bool success = EUSD.transferFrom(user, address(configurator), biddingFee);
             require(success, "TF");
+
             try configurator.distributeRewards() {} catch {}
-        } else {
-            IesLBR(LBR).burn(msg.sender, biddingFee);
+
+            IesLBR(esLBR).mint(user, reward);
+            emit ClaimedOtherEarnings(user, user, reward, biddingFee, useEUSD, block.timestamp);
         }
-        // ... (omitted for brevity)
+    } else {
+        // The rest of the function for non-EUSD purchase remains unchanged
+        // ...
     }
 }
+
